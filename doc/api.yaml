@@ -14,24 +14,7 @@ components:
     Artist:
       $ref: './components/schemas/artist.yaml'
     Album:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: 'Innuendo'
-        year:
-          type: integer
-          example: 1991
-        artistId:
-          type: string
-          format: uuid
-          nullable: true
-      required:
-        - id
-        - name
+      $ref: './components/schemas/album.yaml'
     Track:
       type: object
       properties:
