@@ -3,6 +3,10 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import * as swaggerUi from 'swagger-ui-express';
+import * as YAML from 'yamljs';
+import { join } from 'path';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -13,6 +17,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // --- Swagger ---
+  const swaggerDocument = YAML.load(join(__dirname, '..', 'doc', 'api.yaml'));
+
+  app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  // --- /Swagger ---
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 4000;
