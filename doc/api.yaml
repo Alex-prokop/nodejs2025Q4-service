@@ -10,15 +10,100 @@ servers:
 components:
   schemas:
     User:
-      $ref: './components/schemas/user.yaml'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        login:
+          type: string
+          example: 'TestUser'
+        version:
+          type: number
+          example: 1
+        createdAt:
+          type: number
+          example: 1655000000
+        updatedAt:
+          type: number
+          example: 1655000000
+      required:
+        - id
+        - login
     Artist:
-      $ref: './components/schemas/artist.yaml'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Freddie Mercury'
+        grammy:
+          type: boolean
+          example: false
+      required:
+        - id
+        - name
     Album:
-      $ref: './components/schemas/album.yaml'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Innuendo'
+        year:
+          type: integer
+          example: 1991
+        artistId:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+        - id
+        - name
     Track:
-      $ref: './components/schemas/track.yaml'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: The Show Must Go On
+        artistId:
+          type: string
+          format: uuid
+          nullable: true
+        albumId:
+          type: string
+          format: uuid
+          nullable: true
+        duration:
+          type: integer
+          description: In seconds
+          example: 262
+      required:
+        - id
+        - name
+        - duration
     Favorites:
-      $ref: './components/schemas/favorites.yaml'
+      type: object
+      properties:
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+        albums:
+          type: array
+          items:
+            $ref: '#/components/schemas/Album'
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
@@ -220,10 +305,10 @@ paths:
                   version:
                     type: integer
                     example: 2
-                  createAt:
+                  createdAt:
                     type: integer
                     example: 1655000000
-                  updateAt:
+                  updatedAt:
                     type: integer
                     example: 1655999999
         400:
