@@ -1,0 +1,24 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: The Show Must Go On
+  artistId:
+    type: string
+    format: uuid
+    nullable: true
+  albumId:
+    type: string
+    format: uuid
+    nullable: true
+  duration:
+    type: integer
+    description: In seconds
+    example: 262
+required:
+  - id
+  - name
+  - duration

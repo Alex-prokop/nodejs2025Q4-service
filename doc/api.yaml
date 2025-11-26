@@ -18,20 +18,7 @@ components:
     Track:
       $ref: './components/schemas/track.yaml'
     Favorites:
-      type: object
-      properties:
-        artists:
-          type: array
-          items:
-            $ref: '#/components/schemas/Artist'
-        albums:
-          type: array
-          items:
-            $ref: '#/components/schemas/Album'
-        tracks:
-          type: array
-          items:
-            $ref: '#/components/schemas/Track'
+      $ref: './components/schemas/favorites.yaml'
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
