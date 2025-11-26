@@ -1,0 +1,20 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  login:
+    type: string
+    example: 'TestUser'
+  version:
+    type: number
+    example: 1
+  createdAt:
+    type: number
+    example: 1655000000
+  updatedAt:
+    type: number
+    example: 1655000000
+required:
+  - id
+  - login
