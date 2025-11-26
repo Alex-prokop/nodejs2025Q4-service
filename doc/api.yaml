@@ -12,20 +12,7 @@ components:
     User:
       $ref: './components/schemas/user.yaml'
     Artist:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: 'Freddie Mercury'
-        grammy:
-          type: boolean
-          example: false
-      required:
-        - id
-        - name
+      $ref: './components/schemas/artist.yaml'
     Album:
       type: object
       properties:
