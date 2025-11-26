@@ -65,7 +65,15 @@ export class AlbumService {
       throw new NotFoundException('Album not found');
     }
 
-    // TODO!!! add albumId tracks
+    this.db.tracks.forEach((track) => {
+      if (track.albumId === id) {
+        track.albumId = null;
+      }
+    });
+
+    this.db.favorites.albums = this.db.favorites.albums.filter(
+      (albumId) => albumId !== id,
+    );
 
     this.db.albums.splice(index, 1);
   }

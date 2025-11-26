@@ -70,7 +70,10 @@ export class TrackService {
       throw new NotFoundException('Track not found');
     }
 
-    // TODO!!!
+    this.db.favorites.tracks = this.db.favorites.tracks.filter(
+      (trackId) => trackId !== id,
+    );
+
     this.db.tracks.splice(index, 1);
   }
 }

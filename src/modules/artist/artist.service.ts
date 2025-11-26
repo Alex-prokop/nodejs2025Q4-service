@@ -59,8 +59,21 @@ export class ArtistService {
     if (index === -1) {
       throw new NotFoundException('Artist not found');
     }
+    this.db.albums.forEach((album) => {
+      if (album.artistId === id) {
+        album.artistId = null;
+      }
+    });
 
-    // TODO!! ADD  artistId в albums и tracks
+    this.db.tracks.forEach((track) => {
+      if (track.artistId === id) {
+        track.artistId = null;
+      }
+    });
+
+    this.db.favorites.artists = this.db.favorites.artists.filter(
+      (artistId) => artistId !== id,
+    );
     this.db.artists.splice(index, 1);
   }
 }
