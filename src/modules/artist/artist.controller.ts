@@ -6,13 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { UuidParamPipe } from '../../common/pipes/uuid-param.pipe';
 
 @Controller('artist')
 export class ArtistController {
@@ -25,7 +25,7 @@ export class ArtistController {
 
   @Get(':id')
   findOne(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     return this.artistService.findOne(id);
@@ -38,7 +38,7 @@ export class ArtistController {
 
   @Put(':id')
   update(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
     @Body() dto: UpdateArtistDto,
   ) {
@@ -48,7 +48,7 @@ export class ArtistController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     this.artistService.remove(id);

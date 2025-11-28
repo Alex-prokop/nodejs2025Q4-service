@@ -6,13 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UuidParamPipe } from '../../common/pipes/uuid-param.pipe';
 
 @Controller('user')
 export class UserController {
@@ -25,7 +25,7 @@ export class UserController {
 
   @Get(':id')
   findOne(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     return this.userService.findOne(id);
@@ -38,7 +38,7 @@ export class UserController {
 
   @Put(':id')
   updatePassword(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
     @Body() dto: UpdatePasswordDto,
   ) {
@@ -48,7 +48,7 @@ export class UserController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     this.userService.remove(id);

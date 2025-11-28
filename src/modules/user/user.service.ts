@@ -8,25 +8,26 @@ import { DatabaseService } from '../../common/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User, UserResponse } from './entities/user.entity';
+import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class UserService {
   constructor(private readonly db: DatabaseService) {}
 
-  private toResponse(user: User): UserResponse {
-    const { id, login, version, createdAt, updatedAt } = user;
+  // private toResponse(user: User): UserResponse {
+  //   const { id, login, version, createdAt, updatedAt } = user;
 
-    return {
-      id,
-      login,
-      version,
-      createdAt,
-      updatedAt,
-    };
-  }
+  //   return {
+  //     id,
+  //     login,
+  //     version,
+  //     createdAt,
+  //     updatedAt,
+  //   };
+  // }
 
   findAll(): UserResponse[] {
-    return this.db.users.map((u) => this.toResponse(u));
+    return this.db.users.map((u) => UserMapper.toResponse(u));
   }
 
   findOne(id: string): UserResponse {
@@ -36,7 +37,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    return this.toResponse(user);
+    return UserMapper.toResponse(user);
   }
 
   create(dto: CreateUserDto): UserResponse {
@@ -53,7 +54,7 @@ export class UserService {
 
     this.db.users.push(user);
 
-    return this.toResponse(user);
+    return UserMapper.toResponse(user);
   }
 
   updatePassword(id: string, dto: UpdatePasswordDto): UserResponse {
@@ -71,7 +72,7 @@ export class UserService {
     user.version += 1;
     user.updatedAt = Date.now();
 
-    return this.toResponse(user);
+    return UserMapper.toResponse(user);
   }
 
   remove(id: string): void {

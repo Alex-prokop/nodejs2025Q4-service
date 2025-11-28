@@ -6,13 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { UuidParamPipe } from '../../common/pipes/uuid-param.pipe';
 
 @Controller('track')
 export class TrackController {
@@ -25,7 +25,7 @@ export class TrackController {
 
   @Get(':id')
   findOne(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     return this.trackService.findOne(id);
@@ -38,7 +38,7 @@ export class TrackController {
 
   @Put(':id')
   update(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
     @Body() dto: UpdateTrackDto,
   ) {
@@ -48,7 +48,7 @@ export class TrackController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
-    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    @Param('id', new UuidParamPipe())
     id: string,
   ) {
     this.trackService.remove(id);
