@@ -1,6 +1,8 @@
 # compiled output
 /dist
 /node_modules
+test/coverage
+
 
 # Logs
 logs
@@ -26,6 +28,8 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
+docs/
+
 
 # IDE - VSCode
 .vscode/*
