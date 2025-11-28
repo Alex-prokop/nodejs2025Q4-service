@@ -3,6 +3,7 @@ import { User } from '../../modules/user/entities/user.entity';
 import { Artist } from '../../modules/artist/entities/artist.entity';
 import { Album } from '../../modules/album/entities/album.entity';
 import { Track } from '../../modules/track/entities/track.entity';
+import { Favorites } from '../../modules/favorites/entities/favorites.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -11,9 +12,9 @@ export class DatabaseService {
   albums: Album[] = [];
   tracks: Track[] = [];
 
-  favorites = {
-    artists: [] as string[],
-    albums: [] as string[],
-    tracks: [] as string[],
+  favorites: Favorites = {
+    artists: [],
+    albums: [],
+    tracks: [],
   };
 }

@@ -4,6 +4,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track, TrackResponse } from './entities/track.entity';
+import { cascadeTrackDeletion } from '../../common/utils/cascade.util';
 
 @Injectable()
 export class TrackService {
@@ -70,9 +71,7 @@ export class TrackService {
       throw new NotFoundException('Track not found');
     }
 
-    this.db.favorites.tracks = this.db.favorites.tracks.filter(
-      (trackId) => trackId !== id,
-    );
+    cascadeTrackDeletion(this.db, id);
 
     this.db.tracks.splice(index, 1);
   }

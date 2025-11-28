@@ -4,6 +4,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album, AlbumResponse } from './entities/album.entity';
+import { cascadeAlbumDeletion } from '../../common/utils/cascade.util';
 
 @Injectable()
 export class AlbumService {
@@ -65,15 +66,7 @@ export class AlbumService {
       throw new NotFoundException('Album not found');
     }
 
-    this.db.tracks.forEach((track) => {
-      if (track.albumId === id) {
-        track.albumId = null;
-      }
-    });
-
-    this.db.favorites.albums = this.db.favorites.albums.filter(
-      (albumId) => albumId !== id,
-    );
+    cascadeAlbumDeletion(this.db, id);
 
     this.db.albums.splice(index, 1);
   }

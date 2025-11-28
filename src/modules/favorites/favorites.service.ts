@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from '../../common/database/database.service';
 import { FavoritesResponse } from './entities/favorites.entity';
+import { removeFromFavorites } from '../../common/utils/favorites.util';
 
 @Injectable()
 export class FavoritesService {
@@ -51,7 +52,10 @@ export class FavoritesService {
       throw new NotFoundException('Track is not favorite');
     }
 
-    this.db.favorites.tracks.splice(index, 1);
+    this.db.favorites.tracks = removeFromFavorites(
+      this.db.favorites.tracks,
+      id,
+    );
   }
 
   addAlbum(id: string): void {
@@ -73,7 +77,10 @@ export class FavoritesService {
       throw new NotFoundException('Album is not favorite');
     }
 
-    this.db.favorites.albums.splice(index, 1);
+    this.db.favorites.albums = removeFromFavorites(
+      this.db.favorites.albums,
+      id,
+    );
   }
 
   addArtist(id: string): void {
@@ -95,6 +102,9 @@ export class FavoritesService {
       throw new NotFoundException('Artist is not favorite');
     }
 
-    this.db.favorites.artists.splice(index, 1);
+    this.db.favorites.artists = removeFromFavorites(
+      this.db.favorites.artists,
+      id,
+    );
   }
 }

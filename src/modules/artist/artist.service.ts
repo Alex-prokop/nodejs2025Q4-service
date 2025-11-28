@@ -4,6 +4,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist, ArtistResponse } from './entities/artist.entity';
+import { cascadeArtistDeletion } from '../../common/utils/cascade.util';
 
 @Injectable()
 export class ArtistService {
@@ -59,21 +60,9 @@ export class ArtistService {
     if (index === -1) {
       throw new NotFoundException('Artist not found');
     }
-    this.db.albums.forEach((album) => {
-      if (album.artistId === id) {
-        album.artistId = null;
-      }
-    });
 
-    this.db.tracks.forEach((track) => {
-      if (track.artistId === id) {
-        track.artistId = null;
-      }
-    });
+    cascadeArtistDeletion(this.db, id);
 
-    this.db.favorites.artists = this.db.favorites.artists.filter(
-      (artistId) => artistId !== id,
-    );
     this.db.artists.splice(index, 1);
   }
 }
