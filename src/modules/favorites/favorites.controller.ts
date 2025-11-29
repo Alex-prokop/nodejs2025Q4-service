@@ -15,61 +15,61 @@ export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  getAll() {
+  async getAll() {
     return this.favoritesService.getAll();
   }
 
   @Post('track/:id')
   @HttpCode(HttpStatus.CREATED)
-  addTrack(
-    @Param('id', new UuidParamPipe())
+  async addTrack(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.addTrack(id);
+  ): Promise<void> {
+    await this.favoritesService.addTrack(id);
   }
 
   @Delete('track/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeTrack(
-    @Param('id', new UuidParamPipe())
+  async removeTrack(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.removeTrack(id);
+  ): Promise<void> {
+    await this.favoritesService.removeTrack(id);
   }
 
   @Post('album/:id')
   @HttpCode(HttpStatus.CREATED)
-  addAlbum(
-    @Param('id', new UuidParamPipe())
+  async addAlbum(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.addAlbum(id);
+  ): Promise<void> {
+    await this.favoritesService.addAlbum(id);
   }
 
   @Delete('album/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeAlbum(
-    @Param('id', new UuidParamPipe())
+  async removeAlbum(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.removeAlbum(id);
+  ): Promise<void> {
+    await this.favoritesService.removeAlbum(id);
   }
 
   @Post('artist/:id')
   @HttpCode(HttpStatus.CREATED)
-  addArtist(
-    @Param('id', new UuidParamPipe())
+  async addArtist(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.addArtist(id);
+  ): Promise<void> {
+    await this.favoritesService.addArtist(id);
   }
 
   @Delete('artist/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeArtist(
-    @Param('id', new UuidParamPipe())
+  async removeArtist(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.favoritesService.removeArtist(id);
+  ): Promise<void> {
+    await this.favoritesService.removeArtist(id);
   }
 }
