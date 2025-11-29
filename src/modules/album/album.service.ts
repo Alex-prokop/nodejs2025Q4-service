@@ -3,19 +3,23 @@ import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../common/database/database.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album, AlbumResponse } from './entities/album.entity';
+import { Album } from './entities/album.entity';
 import { cascadeAlbumDeletion } from '../../common/utils/cascade.util';
+import { AlbumRepository } from './repositories/album.repository';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly albumRepository: AlbumRepository,
+    private readonly db: DatabaseService,
+  ) {}
 
-  findAll(): AlbumResponse[] {
-    return this.db.albums;
+  async findAll(): Promise<Album[]> {
+    return this.albumRepository.findAll();
   }
 
-  findOne(id: string): AlbumResponse {
-    const album = this.db.albums.find((a) => a.id === id);
+  async findOne(id: string): Promise<Album> {
+    const album = await this.albumRepository.findById(id);
 
     if (!album) {
       throw new NotFoundException('Album not found');
@@ -24,7 +28,7 @@ export class AlbumService {
     return album;
   }
 
-  create(dto: CreateAlbumDto): AlbumResponse {
+  async create(dto: CreateAlbumDto): Promise<Album> {
     const album: Album = {
       id: randomUUID(),
       name: dto.name,
@@ -32,42 +36,31 @@ export class AlbumService {
       artistId: dto.artistId ?? null,
     };
 
-    this.db.albums.push(album);
-
-    return album;
+    return this.albumRepository.create(album);
   }
 
-  update(id: string, dto: UpdateAlbumDto): AlbumResponse {
-    const album = this.db.albums.find((a) => a.id === id);
+  async update(id: string, dto: UpdateAlbumDto): Promise<Album> {
+    const album = await this.albumRepository.findById(id);
 
     if (!album) {
       throw new NotFoundException('Album not found');
     }
+    album.name = dto.name;
+    album.year = dto.year;
+    album.artistId = dto.artistId ?? null;
 
-    if (dto.name !== undefined) {
-      album.name = dto.name;
-    }
-
-    if (dto.year !== undefined) {
-      album.year = dto.year;
-    }
-
-    if (dto.artistId !== undefined) {
-      album.artistId = dto.artistId;
-    }
-
-    return album;
+    return this.albumRepository.update(album);
   }
 
-  remove(id: string): void {
-    const index = this.db.albums.findIndex((a) => a.id === id);
+  async remove(id: string): Promise<void> {
+    const exists = await this.albumRepository.findById(id);
 
-    if (index === -1) {
+    if (!exists) {
       throw new NotFoundException('Album not found');
     }
 
     cascadeAlbumDeletion(this.db, id);
 
-    this.db.albums.splice(index, 1);
+    await this.albumRepository.delete(id);
   }
 }
