@@ -13,5 +13,6 @@ import { InMemoryTrackRepository } from './repositories/in-memory-track.reposito
       useClass: InMemoryTrackRepository,
     },
   ],
+  exports: [TrackRepository],
 })
 export class TrackModule {}

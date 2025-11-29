@@ -13,5 +13,6 @@ import { InMemoryArtistRepository } from './repositories/in-memory-artist.reposi
       useClass: InMemoryArtistRepository,
     },
   ],
+  exports: [ArtistRepository], //
 })
 export class ArtistModule {}

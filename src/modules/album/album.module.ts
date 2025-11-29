@@ -13,5 +13,6 @@ import { InMemoryAlbumRepository } from './repositories/in-memory-album.reposito
       useClass: InMemoryAlbumRepository,
     },
   ],
+  exports: [AlbumRepository],
 })
 export class AlbumModule {}
