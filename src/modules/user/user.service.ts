@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { DatabaseService } from '../../common/database/database.service';
+import { UserRepository } from './repositories/user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User, UserResponse } from './entities/user.entity';
@@ -12,26 +12,16 @@ import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
-  // private toResponse(user: User): UserResponse {
-  //   const { id, login, version, createdAt, updatedAt } = user;
+  async findAll(): Promise<UserResponse[]> {
+    const users = await this.userRepository.findAll();
 
-  //   return {
-  //     id,
-  //     login,
-  //     version,
-  //     createdAt,
-  //     updatedAt,
-  //   };
-  // }
-
-  findAll(): UserResponse[] {
-    return this.db.users.map((u) => UserMapper.toResponse(u));
+    return users.map((u) => UserMapper.toResponse(u));
   }
 
-  findOne(id: string): UserResponse {
-    const user = this.db.users.find((u) => u.id === id);
+  async findOne(id: string): Promise<UserResponse> {
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -40,7 +30,7 @@ export class UserService {
     return UserMapper.toResponse(user);
   }
 
-  create(dto: CreateUserDto): UserResponse {
+  async create(dto: CreateUserDto): Promise<UserResponse> {
     const now = Date.now();
 
     const user: User = {
@@ -52,13 +42,16 @@ export class UserService {
       updatedAt: now,
     };
 
-    this.db.users.push(user);
+    const created = await this.userRepository.create(user);
 
-    return UserMapper.toResponse(user);
+    return UserMapper.toResponse(created);
   }
 
-  updatePassword(id: string, dto: UpdatePasswordDto): UserResponse {
-    const user = this.db.users.find((u) => u.id === id);
+  async updatePassword(
+    id: string,
+    dto: UpdatePasswordDto,
+  ): Promise<UserResponse> {
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -72,16 +65,16 @@ export class UserService {
     user.version += 1;
     user.updatedAt = Date.now();
 
-    return UserMapper.toResponse(user);
+    const updated = await this.userRepository.update(user);
+
+    return UserMapper.toResponse(updated);
   }
 
-  remove(id: string): void {
-    const index = this.db.users.findIndex((u) => u.id === id);
+  async remove(id: string): Promise<void> {
+    const deleted = await this.userRepository.delete(id);
 
-    if (index === -1) {
+    if (!deleted) {
       throw new NotFoundException('User not found');
     }
-
-    this.db.users.splice(index, 1);
   }
 }
