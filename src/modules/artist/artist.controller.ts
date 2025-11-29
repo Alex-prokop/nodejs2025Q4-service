@@ -13,44 +13,49 @@ import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UuidParamPipe } from '../../common/pipes/uuid-param.pipe';
+import { Artist } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Get()
-  findAll() {
-    return this.artistService.findAll();
+  async findAll(): Promise<Artist[]> {
+    const artists = await this.artistService.findAll();
+    return artists;
   }
 
   @Get(':id')
-  findOne(
-    @Param('id', new UuidParamPipe())
+  async findOne(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    return this.artistService.findOne(id);
+  ): Promise<Artist> {
+    const artist = await this.artistService.findOne(id);
+    return artist;
   }
 
   @Post()
-  create(@Body() dto: CreateArtistDto) {
-    return this.artistService.create(dto);
+  async create(@Body() dto: CreateArtistDto): Promise<Artist> {
+    const artist = await this.artistService.create(dto);
+    return artist;
   }
 
   @Put(':id')
-  update(
-    @Param('id', new UuidParamPipe())
+  async update(
+    @Param('id', UuidParamPipe)
     id: string,
     @Body() dto: UpdateArtistDto,
-  ) {
-    return this.artistService.update(id, dto);
+  ): Promise<Artist> {
+    const artist = await this.artistService.update(id, dto);
+    return artist;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @Param('id', new UuidParamPipe())
+  async remove(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    this.artistService.remove(id);
+  ): Promise<void> {
+    await this.artistService.remove(id);
   }
 }

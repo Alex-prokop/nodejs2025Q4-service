@@ -13,36 +13,41 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UuidParamPipe } from '../../common/pipes/uuid-param.pipe';
+import { UserResponse } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll(): Promise<UserResponse[]> {
+    const users = await this.userService.findAll();
+    return users;
   }
 
   @Get(':id')
-  findOne(
-    @Param('id', new UuidParamPipe())
+  async findOne(
+    @Param('id', UuidParamPipe)
     id: string,
-  ) {
-    return this.userService.findOne(id);
+  ): Promise<UserResponse> {
+    const user = await this.userService.findOne(id);
+    return user;
   }
 
   @Post()
-  create(@Body() dto: CreateUserDto) {
-    return this.userService.create(dto);
+  async create(@Body() dto: CreateUserDto): Promise<UserResponse> {
+    const user = await this.userService.create(dto);
+    return user;
   }
 
   @Put(':id')
-  updatePassword(
-    @Param('id', new UuidParamPipe())
+  async updatePassword(
+    @Param('id', UuidParamPipe)
     id: string,
     @Body() dto: UpdatePasswordDto,
-  ) {
-    return this.userService.updatePassword(id, dto);
+  ): Promise<UserResponse> {
+    const user = await this.userService.updatePassword(id, dto);
+    return user;
   }
 
   @Delete(':id')

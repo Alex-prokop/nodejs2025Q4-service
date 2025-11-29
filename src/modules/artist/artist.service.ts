@@ -3,19 +3,23 @@ import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../common/database/database.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { Artist, ArtistResponse } from './entities/artist.entity';
+import { Artist } from './entities/artist.entity';
 import { cascadeArtistDeletion } from '../../common/utils/cascade.util';
+import { ArtistRepository } from './repositories/artist.repository';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly artistRepository: ArtistRepository,
+    private readonly db: DatabaseService,
+  ) {}
 
-  findAll(): ArtistResponse[] {
-    return this.db.artists;
+  async findAll(): Promise<Artist[]> {
+    return this.artistRepository.findAll();
   }
 
-  findOne(id: string): ArtistResponse {
-    const artist = this.db.artists.find((a) => a.id === id);
+  async findOne(id: string): Promise<Artist> {
+    const artist = await this.artistRepository.findById(id);
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -24,45 +28,38 @@ export class ArtistService {
     return artist;
   }
 
-  create(dto: CreateArtistDto): ArtistResponse {
+  async create(dto: CreateArtistDto): Promise<Artist> {
     const artist: Artist = {
       id: randomUUID(),
       name: dto.name,
       grammy: dto.grammy,
     };
 
-    this.db.artists.push(artist);
-
-    return artist;
+    return this.artistRepository.create(artist);
   }
 
-  update(id: string, dto: UpdateArtistDto): ArtistResponse {
-    const artist = this.db.artists.find((a) => a.id === id);
+  async update(id: string, dto: UpdateArtistDto): Promise<Artist> {
+    const artist = await this.artistRepository.findById(id);
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
 
-    if (dto.name !== undefined) {
-      artist.name = dto.name;
-    }
+    artist.name = dto.name;
+    artist.grammy = dto.grammy;
 
-    if (dto.grammy !== undefined) {
-      artist.grammy = dto.grammy;
-    }
-
-    return artist;
+    return this.artistRepository.update(artist);
   }
 
-  remove(id: string): void {
-    const index = this.db.artists.findIndex((a) => a.id === id);
+  async remove(id: string): Promise<void> {
+    const exists = await this.artistRepository.findById(id);
 
-    if (index === -1) {
+    if (!exists) {
       throw new NotFoundException('Artist not found');
     }
 
     cascadeArtistDeletion(this.db, id);
 
-    this.db.artists.splice(index, 1);
+    await this.artistRepository.delete(id);
   }
 }
