@@ -18,11 +18,9 @@ async function bootstrap() {
     }),
   );
 
-  // --- Swagger ---
   const swaggerDocument = YAML.load(join(__dirname, '..', 'doc', 'api.yaml'));
 
   app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-  // --- /Swagger ---
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 4000;
