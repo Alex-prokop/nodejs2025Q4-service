@@ -39,3 +39,4 @@ docs/
 !.vscode/extensions.json
 
 .env
+/generated/prisma
