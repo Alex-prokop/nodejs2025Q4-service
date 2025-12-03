@@ -8,13 +8,14 @@ import { ArtistModule } from './modules/artist/artist.module';
 import { AlbumModule } from './modules/album/album.module';
 import { TrackModule } from './modules/track/track.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { PrismaModule } from './common/prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
+    PrismaModule,
     DatabaseModule,
     UserModule,
     ArtistModule,

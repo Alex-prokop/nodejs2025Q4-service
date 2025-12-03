@@ -18,8 +18,7 @@ async function bootstrap() {
     }),
   );
 
-  const swaggerDocument = YAML.load(join(__dirname, '..', 'doc', 'api.yaml'));
-
+  const swaggerDocument = YAML.load(join(process.cwd(), 'doc', 'api.yaml'));
   app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   const configService = app.get(ConfigService);
