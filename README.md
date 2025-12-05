@@ -2,71 +2,145 @@
 
 ## Prerequisites
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- **Git** — [Download & Install Git](https://git-scm.com/downloads)
+- **Node.js** (v22+) with **npm** — [Download & Install Node.js](https://nodejs.org/en/download/)
+- **Docker** — [Download & Install Docker](https://docs.docker.com/engine/install/)
 
 ## Downloading
 
-```
-git clone {repository URL}
+```bash
+git clone <repository-url>
+cd nodejs2025Q4-service
 ```
 
-## Installing NPM modules
+## Installing Dependencies
 
-```
+```bash
 npm install
 ```
 
-## Running application
+---
 
-```
-npm start
-```
+## Development Mode
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+Uses `docker-compose.yml` (default) with live-reload support:
 
-## Testing
+- `app`: built from `Dockerfile.dev`, runs `npm run start:dev`
+- `db`: PostgreSQL via `Dockerfile.db`
+- Volume bind-mount: `./:/usr/src/app` → enables hot reload on code changes
+- Same network (`app-net`) and volumes (`pgdata`, `pglogs`) as prod
 
-After application running open new terminal and enter:
+### Workflow
 
-To run all tests without authorization
+#### 1. Start the dev stack
 
-```
-npm run test
-```
+From the project root:
 
-To run only one of all test suites
-
-```
-npm run test -- <path to suite>
+```bash
+docker compose up -d
 ```
 
-To run all test with authorization
+Creates containers: `home-library-app`, `home-library-db`.
+
+#### 2. View logs
+
+- Static logs:
+  ```bash
+  docker compose logs app
+  docker compose logs db
+  ```
+- Live (follow) mode:
+  ```bash
+  docker compose logs -f app
+  ```
+  Expected: `Starting compilation in watch mode...`
+
+#### 3. Verify dev API
+
+```bash
+curl http://localhost:4000/      # → "Hello World!"
+curl http://localhost:4000/user  # → [] (empty array on fresh DB)
+```
+
+#### 4. Run tests inside the dev container
+
+```bash
+docker compose exec app npm test
+```
+
+#### 5. Run script for vulnerabilities scanning
+
+```bash
+npm run scan:vuln
+```
+
+> **Note**: The only difference from production is the runtime — dev uses source code with live reload; prod uses the prebuilt, optimized image.
+
+---
+
+## Production Deployment (DockerHub)
+
+A ready-to-use production image is published on Docker Hub:
 
 ```
-npm run test:auth
+alexprokop7/home-library:latest
 ```
 
-To run only specific test suite with authorization
+### Image Build Strategy (`multi-stage`)
 
-```
-npm run test:auth -- <path to suite>
-```
+- **`builder` stage**:  
+  `npm ci` → `npm run build` → NestJS compiled to `dist/`
 
-### Auto-fix and format
+- **`runner` stage**:  
+  `npm ci --omit=dev` → copies `dist/` and `doc/api.yaml`  
+  Entrypoint: `npm run start:prod` → `node dist/src/main.js`
 
-```
-npm run lint
-```
+### Running with `docker-compose.hub.yml`
 
-```
-npm run format
-```
+The repository includes `docker-compose.hub.yml`, which uses the prebuilt Docker Hub image and starts:
 
-### Debugging in VSCode
+- `app`: application container (`alexprokop7/home-library:latest`)
+- `db`: PostgreSQL container (`postgres:16-alpine`)
+- Custom bridge network: `app-net`
+- Volumes: `pgdata`, `pglogs` (for Postgres data & logs)
 
-Press <kbd>F5</kbd> to debug.
+#### Step-by-step setup:
 
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+1. **Start the database only**
+
+   ```bash
+   docker compose -f docker-compose.hub.yml up -d db
+   ```
+
+2. **Run Prisma migrations**
+
+   ```bash
+   npm run prisma:migrate:hub
+   ```
+
+3. **Start the full stack**
+
+   ```bash
+   docker compose -f docker-compose.hub.yml up -d
+   ```
+
+4. **Verify the service is running**
+   - Application logs:
+
+     ```bash
+     docker compose -f docker-compose.hub.yml logs app
+     ```
+
+     Expected output includes:
+
+     ```
+     Nest application successfully started
+     ```
+
+     and route registration for `/`, `/user`, `/artist`, `/album`, `/track`, `/favs`, etc.
+
+   - HTTP endpoint test:
+     ```bash
+     curl http://localhost:4000/      # → "Hello World!"
+     curl http://localhost:4000/user  # → [] (empty array on fresh DB)
+     ```
