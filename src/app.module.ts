@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './common/database/database.module';
+// import { DatabaseModule } from './common/database/database.module';
 import { UserModule } from './modules/user/user.module';
 import { ArtistModule } from './modules/artist/artist.module';
 import { AlbumModule } from './modules/album/album.module';
@@ -16,7 +16,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
       isGlobal: true,
     }),
     PrismaModule,
-    DatabaseModule,
+    // DatabaseModule,
     UserModule,
     ArtistModule,
     AlbumModule,

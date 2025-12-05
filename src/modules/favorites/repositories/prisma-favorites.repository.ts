@@ -33,7 +33,6 @@ export class PrismaFavoritesRepository extends FavoritesRepository {
 
     if (existing) return existing;
 
-    // если записи ещё нет — создаём пустую
     return this.prisma.favorites.create({
       data: {
         id: 1,
@@ -50,7 +49,6 @@ export class PrismaFavoritesRepository extends FavoritesRepository {
   }
 
   async setFavorites(favorites: Favorites): Promise<void> {
-    // чтобы не зависеть от того, есть ли уже строка — делаем upsert
     await this.prisma.favorites.upsert({
       where: { id: 1 },
       create: {

@@ -1,17 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { DatabaseService } from '../../common/database/database.service';
+// import { DatabaseService } from '../../common/database/database.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import { cascadeArtistDeletion } from '../../common/utils/cascade.util';
 import { ArtistRepository } from './repositories/artist.repository';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
 export class ArtistService {
   constructor(
     private readonly artistRepository: ArtistRepository,
-    private readonly db: DatabaseService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async findAll(): Promise<Artist[]> {
@@ -58,7 +59,7 @@ export class ArtistService {
       throw new NotFoundException('Artist not found');
     }
 
-    cascadeArtistDeletion(this.db, id);
+    cascadeArtistDeletion(this.prisma, id);
 
     await this.artistRepository.delete(id);
   }

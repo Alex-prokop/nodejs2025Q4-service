@@ -21,8 +21,10 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 
+COPY --from=builder /usr/src/app/doc ./doc
+
 ENV NODE_ENV=production
 ENV PORT=4000
 
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]

@@ -1,17 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { DatabaseService } from '../../common/database/database.service';
+// import { DatabaseService } from '../../common/database/database.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import { cascadeTrackDeletion } from '../../common/utils/cascade.util';
 import { TrackRepository } from './repositories/track.repository';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
 export class TrackService {
   constructor(
     private readonly trackRepository: TrackRepository,
-    private readonly db: DatabaseService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async findAll(): Promise<Track[]> {
@@ -62,7 +63,7 @@ export class TrackService {
       throw new NotFoundException('Track not found');
     }
 
-    cascadeTrackDeletion(this.db, id);
+    cascadeTrackDeletion(this.prisma, id);
 
     await this.trackRepository.delete(id);
   }

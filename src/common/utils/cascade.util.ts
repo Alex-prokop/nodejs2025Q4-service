@@ -1,32 +1,82 @@
-import { DatabaseService } from '../database/database.service';
-import { removeFromFavorites } from './favorites.util';
+import { PrismaService } from '../prisma/prisma.service';
 
-export function cascadeArtistDeletion(db: DatabaseService, artistId: string) {
-  db.albums.forEach((album) => {
-    if (album.artistId === artistId) {
-      album.artistId = null;
-    }
+export async function cascadeArtistDeletion(
+  prisma: PrismaService,
+  artistId: string,
+): Promise<void> {
+  await prisma.album.updateMany({
+    where: { artistId },
+    data: { artistId: null },
   });
 
-  db.tracks.forEach((track) => {
-    if (track.artistId === artistId) {
-      track.artistId = null;
-    }
+  await prisma.track.updateMany({
+    where: { artistId },
+    data: { artistId: null },
   });
 
-  db.favorites.artists = removeFromFavorites(db.favorites.artists, artistId);
+  const favoritesRow = await prisma.favorites.findUnique({
+    where: { id: 1 },
+  });
+
+  if (favoritesRow && favoritesRow.artists.includes(artistId)) {
+    const newArtists = favoritesRow.artists.filter((id) => id !== artistId);
+
+    await prisma.favorites.update({
+      where: { id: favoritesRow.id },
+      data: {
+        artists: {
+          set: newArtists,
+        },
+      },
+    });
+  }
 }
 
-export function cascadeAlbumDeletion(db: DatabaseService, albumId: string) {
-  db.tracks.forEach((track) => {
-    if (track.albumId === albumId) {
-      track.albumId = null;
-    }
+export async function cascadeAlbumDeletion(
+  prisma: PrismaService,
+  albumId: string,
+): Promise<void> {
+  await prisma.track.updateMany({
+    where: { albumId },
+    data: { albumId: null },
   });
 
-  db.favorites.albums = removeFromFavorites(db.favorites.albums, albumId);
+  const favoritesRow = await prisma.favorites.findUnique({
+    where: { id: 1 },
+  });
+
+  if (favoritesRow && favoritesRow.albums.includes(albumId)) {
+    const newAlbums = favoritesRow.albums.filter((id) => id !== albumId);
+
+    await prisma.favorites.update({
+      where: { id: favoritesRow.id },
+      data: {
+        albums: {
+          set: newAlbums,
+        },
+      },
+    });
+  }
 }
 
-export function cascadeTrackDeletion(db: DatabaseService, trackId: string) {
-  db.favorites.tracks = removeFromFavorites(db.favorites.tracks, trackId);
+export async function cascadeTrackDeletion(
+  prisma: PrismaService,
+  trackId: string,
+): Promise<void> {
+  const favoritesRow = await prisma.favorites.findUnique({
+    where: { id: 1 },
+  });
+
+  if (favoritesRow && favoritesRow.tracks.includes(trackId)) {
+    const newTracks = favoritesRow.tracks.filter((id) => id !== trackId);
+
+    await prisma.favorites.update({
+      where: { id: favoritesRow.id },
+      data: {
+        tracks: {
+          set: newTracks,
+        },
+      },
+    });
+  }
 }
