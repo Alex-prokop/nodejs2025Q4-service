@@ -13,6 +13,12 @@ git clone <repository-url>
 cd nodejs2025Q4-service
 ```
 
+## Checkout task branch
+
+```bash
+git checkout task/docker-postgres-orm
+```
+
 ## Installing Dependencies
 
 ```bash
@@ -23,7 +29,11 @@ npm install
 
 All required environment variables are already described in `.env.example`.
 
-Create a real `.env` file based on this template.
+Create a real `.env` file based on this template:
+
+```bash
+cp .env.example .env
+```
 
 ---
 
@@ -40,7 +50,13 @@ Uses `docker-compose.yml` (default) with live-reload support:
 
 #### 1. Start the dev stack
 
-From the project root:
+_Optional:_ if some old stack is running, stop it first:
+
+```bash
+docker compose down
+```
+
+Then, from the project root:
 
 ```bash
 docker compose up -d
@@ -51,14 +67,18 @@ Creates containers: `home-library-app`, `home-library-db`.
 #### 2. View logs
 
 - Static logs:
+
   ```bash
   docker compose logs app
   docker compose logs db
   ```
+
 - Live (follow) mode:
+
   ```bash
   docker compose logs -f app
   ```
+
   Expected: `Starting compilation in watch mode...`
 
 #### 3. Verify dev API
@@ -111,6 +131,12 @@ The repository includes `docker-compose.hub.yml`, which uses the prebuilt Docker
 - Volumes: `pgdata`, `pglogs` (for Postgres data & logs)
 
 #### Step-by-step setup:
+
+_Optional:_ if dev stack is running, you can stop it:
+
+```bash
+ docker compose down
+```
 
 1. **Start the database only**
 
