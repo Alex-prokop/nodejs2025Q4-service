@@ -9,14 +9,10 @@
 ## Downloading
 
 ```bash
-git clone <repository-url>
-cd nodejs2025Q4-service
-```
+git clone -b task/docker-postgres-orm --single-branch \
+  https://github.com/Alex-prokop/nodejs2025Q4-service.git
 
-## Checkout task branch
-
-```bash
-git checkout task/docker-postgres-orm
+  cd nodejs2025Q4-service
 ```
 
 ## Installing Dependencies
