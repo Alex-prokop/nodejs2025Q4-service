@@ -19,6 +19,12 @@ cd nodejs2025Q4-service
 npm install
 ```
 
+## Environment variables
+
+All required environment variables are already described in `.env.example`.
+
+Create a real `.env` file based on this template.
+
 ---
 
 ## Development Mode
