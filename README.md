@@ -2,71 +2,173 @@
 
 ## Prerequisites
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- **Git** — [Download & Install Git](https://git-scm.com/downloads)
+- **Node.js** (v22+) with **npm** — [Download & Install Node.js](https://nodejs.org/en/download/)
+- **Docker** — [Download & Install Docker](https://docs.docker.com/engine/install/)
 
 ## Downloading
 
-```
-git clone {repository URL}
+```bash
+git clone -b task/docker-postgres-orm --single-branch \
+  https://github.com/Alex-prokop/nodejs2025Q4-service.git
+
+  cd nodejs2025Q4-service
 ```
 
-## Installing NPM modules
+## Installing Dependencies
 
-```
+```bash
 npm install
 ```
 
-## Running application
+## Environment variables
 
-```
-npm start
-```
+All required environment variables are already described in `.env.example`.
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+Create a real `.env` file based on this template:
 
-## Testing
-
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```
-npm run test
+```bash
+cp .env.example .env
 ```
 
-To run only one of all test suites
+---
 
-```
-npm run test -- <path to suite>
-```
+## Development Mode
 
-To run all test with authorization
+Uses `docker-compose.yml` (default) with live-reload support:
 
-```
-npm run test:auth
-```
+- `app`: built from `Dockerfile.dev`, runs `npm run start:dev`
+- `db`: PostgreSQL via `Dockerfile.db`
+- Volume bind-mount: `./:/usr/src/app` → enables hot reload on code changes
+- Same network (`app-net`) and volumes (`pgdata`, `pglogs`) as prod
 
-To run only specific test suite with authorization
+### Workflow
 
-```
-npm run test:auth -- <path to suite>
-```
+#### 1. Start the dev stack
 
-### Auto-fix and format
+_Optional:_ if some old stack is running, stop it first:
 
-```
-npm run lint
+```bash
+docker compose down
 ```
 
+Then, from the project root:
+
+```bash
+docker compose up -d
 ```
-npm run format
+
+Creates containers: `home-library-app`, `home-library-db`.
+
+#### 2. View logs
+
+- Static logs:
+
+  ```bash
+  docker compose logs app
+  docker compose logs db
+  ```
+
+- Live (follow) mode:
+
+  ```bash
+  docker compose logs -f app
+  ```
+
+  Expected: `Starting compilation in watch mode...`
+
+#### 3. Verify dev API
+
+```bash
+curl http://localhost:4000/      # → "Hello World!"
+curl http://localhost:4000/user  # → [] (empty array on fresh DB)
 ```
 
-### Debugging in VSCode
+#### 4. Run tests inside the dev container
 
-Press <kbd>F5</kbd> to debug.
+```bash
+docker compose exec app npm test
+```
 
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+#### 5. Run script for vulnerabilities scanning
+
+```bash
+npm run scan:vuln
+```
+
+> **Note**: The only difference from production is the runtime — dev uses source code with live reload; prod uses the prebuilt, optimized image.
+
+---
+
+## Production Deployment (DockerHub)
+
+A ready-to-use production image is published on Docker Hub:
+
+```
+alexprokop7/home-library:latest
+```
+
+### Image Build Strategy (`multi-stage`)
+
+- **`builder` stage**:  
+  `npm ci` → `npm run build` → NestJS compiled to `dist/`
+
+- **`runner` stage**:  
+  `npm ci --omit=dev` → copies `dist/` and `doc/api.yaml`  
+  Entrypoint: `npm run start:prod` → `node dist/src/main.js`
+
+### Running with `docker-compose.hub.yml`
+
+The repository includes `docker-compose.hub.yml`, which uses the prebuilt Docker Hub image and starts:
+
+- `app`: application container (`alexprokop7/home-library:latest`)
+- `db`: PostgreSQL container (`postgres:16-alpine`)
+- Custom bridge network: `app-net`
+- Volumes: `pgdata`, `pglogs` (for Postgres data & logs)
+
+#### Step-by-step setup:
+
+_Optional:_ if dev stack is running, you can stop it:
+
+```bash
+ docker compose down
+```
+
+1. **Start the database only**
+
+   ```bash
+   docker compose -f docker-compose.hub.yml up -d db
+   ```
+
+2. **Run Prisma migrations**
+
+   ```bash
+   npm run prisma:migrate:hub
+   ```
+
+3. **Start the full stack**
+
+   ```bash
+   docker compose -f docker-compose.hub.yml up -d
+   ```
+
+4. **Verify the service is running**
+   - Application logs:
+
+     ```bash
+     docker compose -f docker-compose.hub.yml logs app
+     ```
+
+     Expected output includes:
+
+     ```
+     Nest application successfully started
+     ```
+
+     and route registration for `/`, `/user`, `/artist`, `/album`, `/track`, `/favs`, etc.
+
+   - HTTP endpoint test:
+     ```bash
+     curl http://localhost:4000/      # → "Hello World!"
+     curl http://localhost:4000/user  # → [] (empty array on fresh DB)
+     ```
