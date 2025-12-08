@@ -28,7 +28,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:force": "npx prisma validate ; npx prisma generate",
-    "prisma:migrate:hub": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate deploy"
+    "prisma:migrate:hub": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate deploy",
+    "prisma:migrate:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate dev",
+    "start:dev:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public nest start --watch",
+    "dev:local": "npm run prisma:migrate:local && npm run start:dev:local"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",

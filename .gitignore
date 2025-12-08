@@ -40,3 +40,4 @@ docs/
 
 .env
 /generated/prisma
+logs/
