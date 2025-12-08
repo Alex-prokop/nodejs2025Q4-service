@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as swaggerUi from 'swagger-ui-express';
 import * as YAML from 'yamljs';
 import { join } from 'path';
+import { LoggingService } from './common/logging/logging.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,9 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 4000;
+
+  const logger = app.get(LoggingService);
+  logger.log('Application starting...', 'Bootstrap');
 
   await app.listen(port);
 }
