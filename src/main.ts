@@ -7,6 +7,8 @@ import * as swaggerUi from 'swagger-ui-express';
 import * as YAML from 'yamljs';
 import { join } from 'path';
 import { LoggingService } from './common/logging/logging.service';
+import { LoggingInterceptor } from './common/logging/logging.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,6 +28,23 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 4000;
 
   const logger = app.get(LoggingService);
+
+  app.useGlobalInterceptors(new LoggingInterceptor(logger));
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
+
+  process.on('uncaughtException', (err: Error) => {
+    logger.error(`Uncaught exception: ${err.message}`, err.stack, 'Process');
+    //Todo можно process.exit(1)
+  });
+
+  process.on('unhandledRejection', (reason: unknown) => {
+    logger.error(
+      `Unhandled rejection: ${JSON.stringify(reason)}`,
+      reason instanceof Error ? reason.stack : undefined,
+      'Process',
+    );
+  });
+
   logger.log('Application starting...', 'Bootstrap');
 
   await app.listen(port);
