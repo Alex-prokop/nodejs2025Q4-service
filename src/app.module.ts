@@ -10,12 +10,14 @@ import { TrackModule } from './modules/track/track.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { LoggingModule } from './common/logging/logging.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    AuthModule,
     LoggingModule,
     PrismaModule,
     // DatabaseModule,

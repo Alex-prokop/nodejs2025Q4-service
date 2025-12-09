@@ -31,7 +31,12 @@
     "prisma:migrate:hub": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate deploy",
     "prisma:migrate:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate dev",
     "start:dev:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public nest start --watch",
-    "dev:local": "npm run prisma:migrate:local && npm run start:dev:local"
+    "dev:local": "npm run prisma:migrate:local && npm run start:dev:local",
+    "db:reset:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public npx prisma migrate reset --force",
+    "pretest:users:e2e": "npm run db:reset:local",
+    "test:users:e2e": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public jest --noStackTrace --runInBand test/users.e2e.spec.ts",
+    "pretest:e2e": "npm run db:reset:local",
+    "test:e2e": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public jest --noStackTrace --runInBand"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
@@ -43,6 +48,7 @@
     "@prisma/adapter-pg": "^7.0.1",
     "@prisma/client": "^7.0.1",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.6.1",

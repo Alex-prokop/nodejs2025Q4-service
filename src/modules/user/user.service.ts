@@ -9,7 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User, UserResponse } from './entities/user.entity';
 import { UserMapper } from './user.mapper';
-
+import { hashPassword, verifyPassword } from '../../common/utils/password.util';
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -33,10 +33,12 @@ export class UserService {
   async create(dto: CreateUserDto): Promise<UserResponse> {
     const now = Date.now();
 
+    const hashedPassword = await hashPassword(dto.password);
+
     const user: User = {
       id: randomUUID(),
       login: dto.login,
-      password: dto.password,
+      password: hashedPassword,
       version: 1,
       createdAt: now,
       updatedAt: now,
@@ -56,12 +58,15 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    const isValid = await verifyPassword(dto.oldPassword, user.password);
 
-    if (user.password !== dto.oldPassword) {
+    if (!isValid) {
       throw new ForbiddenException('Old password is wrong');
     }
 
-    user.password = dto.newPassword;
+    const newHashedPassword = await hashPassword(dto.newPassword);
+
+    user.password = newHashedPassword;
     user.version += 1;
     user.updatedAt = Date.now();
 
