@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
@@ -63,7 +64,10 @@ export class AuthService {
 
   // --------- signup ---------
 
-  async signup(login: string, password: string): Promise<{ message: string }> {
+  async signup(
+    login: string,
+    password: string,
+  ): Promise<{ id: string; login: string }> {
     if (typeof login !== 'string' || typeof password !== 'string') {
       throw new BadRequestException('login and password must be strings');
     }
@@ -80,7 +84,7 @@ export class AuthService {
     const id = randomUUID();
     const passwordHash = await hashPassword(password);
 
-    await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         id,
         login,
@@ -91,7 +95,7 @@ export class AuthService {
       },
     });
 
-    return { message: 'User created' };
+    return { id: user.id, login: user.login };
   }
 
   // --------- login ---------
@@ -126,7 +130,7 @@ export class AuthService {
 
   async refreshToken(refreshToken: string): Promise<Tokens> {
     if (!refreshToken || typeof refreshToken !== 'string') {
-      throw new BadRequestException('refreshToken must be provided');
+      throw new UnauthorizedException('refreshToken must be provided');
     }
 
     try {

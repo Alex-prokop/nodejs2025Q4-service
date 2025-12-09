@@ -12,34 +12,44 @@ import { JwtPayload } from './jwt-payload.interface';
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
+  private isPublicPath(path: string): boolean {
+    if (!path) return false;
+
+    return (
+      path === '/' ||
+      path.startsWith('/doc') ||
+      path === '/auth/signup' ||
+      path === '/auth/login' ||
+      path === '/auth/refresh'
+    );
+  }
+
+  private shouldCheckAuth(): boolean {
+    return process.env.TEST_MODE === 'auth';
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const httpCtx = context.switchToHttp();
-    const req = httpCtx.getRequest<Request>();
+    const req = context.switchToHttp().getRequest<Request>();
+    const path = req.path;
 
-    const isAuthMode = process.env.TEST_MODE === 'auth';
-
-    if (!isAuthMode) {
+    if (!this.shouldCheckAuth()) {
       return true;
     }
 
-    const path = req.path || req.url;
-
-    if (path === '/' || path.startsWith('/doc') || path.startsWith('/auth/')) {
+    if (this.isPublicPath(path)) {
       return true;
     }
 
-    const authHeader =
-      (req.headers['authorization'] as string | undefined) ||
-      (req.headers['Authorization'] as string | undefined);
+    const authHeader = req.headers['authorization'];
 
-    if (!authHeader) {
-      throw new UnauthorizedException('Authorization header missing');
+    if (!authHeader || Array.isArray(authHeader)) {
+      throw new UnauthorizedException('Authorization header is missing');
     }
 
     const [scheme, token] = authHeader.split(' ');
 
     if (scheme !== 'Bearer' || !token) {
-      throw new UnauthorizedException('Invalid authorization header');
+      throw new UnauthorizedException('Invalid authorization header format');
     }
 
     try {
@@ -50,7 +60,7 @@ export class JwtAuthGuard implements CanActivate {
       (req as any).user = payload;
 
       return true;
-    } catch (_err) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
