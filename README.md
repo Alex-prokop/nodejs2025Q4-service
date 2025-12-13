@@ -9,9 +9,11 @@
 ## Downloading
 
 ```bash
-git clone -b task/docker-postgres-orm --single-branch \
+git clone -b task/logging-error-authentication-authorization --single-branch \
   https://github.com/Alex-prokop/nodejs2025Q4-service.git
+```
 
+```bash
   cd nodejs2025Q4-service
 ```
 
@@ -84,91 +86,46 @@ curl http://localhost:4000/      # → "Hello World!"
 curl http://localhost:4000/user  # → [] (empty array on fresh DB)
 ```
 
-#### 4. Run tests inside the dev container
+## Running tests
+
+Option A — Locally (Node on host, DB in Docker)
+
+#### 1. _Optional:_ stop any previous stack:
 
 ```bash
-docker compose exec app npm test
+docker compose down
 ```
 
-#### 5. Run script for vulnerabilities scanning
+#### 2. Start only the database:
 
 ```bash
-npm run scan:vuln
+docker compose up -d db
 ```
 
-> **Note**: The only difference from production is the runtime — dev uses source code with live reload; prod uses the prebuilt, optimized image.
-
----
-
-## Production Deployment (DockerHub)
-
-A ready-to-use production image is published on Docker Hub:
-
-```
-alexprokop7/home-library:latest
-```
-
-### Image Build Strategy (`multi-stage`)
-
-- **`builder` stage**:  
-  `npm ci` → `npm run build` → NestJS compiled to `dist/`
-
-- **`runner` stage**:  
-  `npm ci --omit=dev` → copies `dist/` and `doc/api.yaml`  
-  Entrypoint: `npm run start:prod` → `node dist/src/main.js`
-
-### Running with `docker-compose.hub.yml`
-
-The repository includes `docker-compose.hub.yml`, which uses the prebuilt Docker Hub image and starts:
-
-- `app`: application container (`alexprokop7/home-library:latest`)
-- `db`: PostgreSQL container (`postgres:16-alpine`)
-- Custom bridge network: `app-net`
-- Volumes: `pgdata`, `pglogs` (for Postgres data & logs)
-
-#### Step-by-step setup:
-
-_Optional:_ if dev stack is running, you can stop it:
+#### 3. Run migrations:
 
 ```bash
- docker compose down
+npm run prisma:migrate:local
 ```
 
-1. **Start the database only**
+#### 4. Run e2e tests with auth:
 
-   ```bash
-   docker compose -f docker-compose.hub.yml up -d db
-   ```
+```bash
+npm run test:auth
+```
 
-2. **Run Prisma migrations**
+```bash
+npm run test:refresh
+```
 
-   ```bash
-   npm run prisma:migrate:hub
-   ```
+#### 5. _Optional:_ reset database:
 
-3. **Start the full stack**
+```bash
+npm run db:reset:local
+```
 
-   ```bash
-   docker compose -f docker-compose.hub.yml up -d
-   ```
+## Option B — Fully in Docker
 
-4. **Verify the service is running**
-   - Application logs:
-
-     ```bash
-     docker compose -f docker-compose.hub.yml logs app
-     ```
-
-     Expected output includes:
-
-     ```
-     Nest application successfully started
-     ```
-
-     and route registration for `/`, `/user`, `/artist`, `/album`, `/track`, `/favs`, etc.
-
-   - HTTP endpoint test:
-     ```bash
-     curl http://localhost:4000/      # → "Hello World!"
-     curl http://localhost:4000/user  # → [] (empty array on fresh DB)
-     ```
+```bash
+npm run docker:test
+```
