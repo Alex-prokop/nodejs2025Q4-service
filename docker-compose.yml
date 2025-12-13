@@ -39,6 +39,49 @@ services:
     networks:
       - app-net
 
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    container_name: home-library-tests
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - app-net
+    command: >
+      sh -c "
+        echo '--- [tests] Wait for DB (db:5432) ---' &&
+        until nc -z db 5432; do
+          echo '[tests] DB is not ready yet, sleep 1s...';
+          sleep 1;
+        done &&
+        echo '[tests] DB is up' &&
+
+        echo '--- [tests] Reset DB (prisma migrate reset --force) ---' &&
+        npx prisma migrate reset --force &&
+
+        echo '--- [tests] Start Nest (TEST_MODE=auth) ---' &&
+        npm run start:test:docker &
+
+        echo '--- [tests] Wait for Nest on localhost:4000 ---' &&
+        until nc -z localhost 4000; do
+          echo '[tests] Nest is not ready yet, sleep 1s...';
+          sleep 1;
+        done &&
+        echo '[tests] Nest is up' &&
+
+        echo '--- [tests] Run test:auth ---' &&
+        npm run test:auth &&
+        echo '--- [tests] Run test:refresh ---' &&
+        npm run test:refresh &&
+
+        echo '[tests] All tests passed'
+      "
+
 networks:
   app-net:
     driver: bridge

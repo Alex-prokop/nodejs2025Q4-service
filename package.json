@@ -30,10 +30,13 @@
     "prisma:force": "npx prisma validate ; npx prisma generate",
     "prisma:migrate:hub": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate deploy",
     "prisma:migrate:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public prisma migrate dev",
+    "prisma:studio:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public npx prisma studio",
     "start:dev:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public nest start --watch",
     "start:dev:local:auth": "cross-env TEST_MODE=auth DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public nest start --watch",
     "dev:local": "npm run prisma:migrate:local && npm run start:dev:local",
-    "db:reset:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public npx prisma migrate reset --force"
+    "db:reset:local": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_library?schema=public npx prisma migrate reset --force",
+    "start:test:docker": "cross-env TEST_MODE=auth nest start",
+    "docker:test": "docker compose up --build --abort-on-container-exit --exit-code-from tests tests"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
