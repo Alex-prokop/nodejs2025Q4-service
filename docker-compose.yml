@@ -8,11 +8,17 @@ services:
       args:
         DATABASE_URL: ${DATABASE_URL}
     container_name: home-library-app
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npm run start:dev
+      "
     ports:
       - '${PORT:-4000}:4000'
     env_file:
       - .env
+    environment:
+      - TEST_MODE=auth
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

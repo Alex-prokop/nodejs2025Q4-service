@@ -88,7 +88,7 @@ curl http://localhost:4000/user  # → [] (empty array on fresh DB)
 
 ## Running tests
 
-Option A — Locally (Node on host, DB in Docker)
+## Option A — Locally (Node on host, DB in Docker)
 
 #### 1. _Optional:_ stop any previous stack:
 
@@ -108,7 +108,13 @@ docker compose up -d db
 npm run prisma:migrate:local
 ```
 
-#### 4. Run e2e tests with auth:
+#### 4. Run the application locally with authorization
+
+```bash
+npm run start:dev:local:auth
+```
+
+#### 5. Run e2e tests with auth:
 
 ```bash
 npm run test:auth
@@ -118,7 +124,7 @@ npm run test:auth
 npm run test:refresh
 ```
 
-#### 5. _Optional:_ reset database:
+#### 6. _Optional:_ reset database:
 
 ```bash
 npm run db:reset:local
