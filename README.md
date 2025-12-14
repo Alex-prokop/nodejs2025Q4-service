@@ -2,71 +2,136 @@
 
 ## Prerequisites
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- **Git** — [Download & Install Git](https://git-scm.com/downloads)
+- **Node.js** (v22+) with **npm** — [Download & Install Node.js](https://nodejs.org/en/download/)
+- **Docker** — [Download & Install Docker](https://docs.docker.com/engine/install/)
 
 ## Downloading
 
-```
-git clone {repository URL}
+```bash
+git clone -b task/logging-error-authentication-authorization --single-branch \
+  https://github.com/Alex-prokop/nodejs2025Q4-service.git
 ```
 
-## Installing NPM modules
-
+```bash
+  cd nodejs2025Q4-service
 ```
+
+## Installing Dependencies
+
+```bash
 npm install
 ```
 
-## Running application
+## Environment variables
 
-```
-npm start
-```
+All required environment variables are already described in `.env.example`.
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+Create a real `.env` file based on this template:
 
-## Testing
-
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```
-npm run test
+```bash
+cp .env.example .env
 ```
 
-To run only one of all test suites
+---
 
-```
-npm run test -- <path to suite>
+## Development Mode
+
+Uses `docker-compose.yml` (default) with live-reload support:
+
+- `app`: built from `Dockerfile.dev`, runs `npm run start:dev`
+- `db`: PostgreSQL via `Dockerfile.db`
+- Volume bind-mount: `./:/usr/src/app` → enables hot reload on code changes
+- Same network (`app-net`) and volumes (`pgdata`, `pglogs`) as prod
+
+### Workflow
+
+#### 1. Start the dev stack
+
+_Optional:_ if some old stack is running, stop it first:
+
+```bash
+docker compose down
 ```
 
-To run all test with authorization
+Then, from the project root:
 
+```bash
+docker compose up -d
 ```
+
+Creates containers: `home-library-app`, `home-library-db`.
+
+#### 2. View logs
+
+- Static logs:
+
+  ```bash
+  docker compose logs app
+  docker compose logs db
+  ```
+
+- Live (follow) mode:
+
+  ```bash
+  docker compose logs -f app
+  ```
+
+  Expected: `Starting compilation in watch mode...`
+
+#### 3. Verify dev API
+
+```bash
+curl http://localhost:4000/      # → "Hello World!"
+curl http://localhost:4000/user  # → [] (empty array on fresh DB)
+```
+
+## Running tests
+
+## Option A — Locally (Node on host, DB in Docker)
+
+#### 1. _Optional:_ stop any previous stack:
+
+```bash
+docker compose down
+```
+
+#### 2. Start only the database:
+
+```bash
+docker compose up -d db
+```
+
+#### 3. Run migrations:
+
+```bash
+npm run prisma:migrate:local
+```
+
+#### 4. Run the application locally with authorization
+
+```bash
+npm run start:dev:local:auth
+```
+
+#### 5. Run e2e tests with auth:
+
+```bash
 npm run test:auth
 ```
 
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
+```bash
+npm run test:refresh
 ```
 
-### Auto-fix and format
+#### 6. _Optional:_ reset database:
 
-```
-npm run lint
-```
-
-```
-npm run format
+```bash
+npm run db:reset:local
 ```
 
-### Debugging in VSCode
+## Option B — Fully in Docker
 
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+```bash
+npm run docker:test
+```
